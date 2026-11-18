@@ -1,4 +1,4 @@
 .env
 *.log
-./prueba.php
-./ideas.php
+/prueba.php
+/ideas.php

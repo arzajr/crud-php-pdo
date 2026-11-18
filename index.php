@@ -14,6 +14,9 @@ $respuesta = $ideas->fetchAll(PDO::FETCH_ASSOC);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lista de Ideas</title>
 
+    <!-- JavaScript (fetch) -->
+    <script src="script.js" defer></script>
+
     <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
         rel="stylesheet">
@@ -106,7 +109,7 @@ $respuesta = $ideas->fetchAll(PDO::FETCH_ASSOC);
                 <h1 class="mb-4">Lista de Ideas </h1>
 
                 <!-- Formulario para añadir ideas -->
-                <form action="guardar.php" method="post" class="mb-4">
+                <form id="formulario" action="guardar.php" method="post" class="mb-4">
 
                     <label class="form-label">Nombre de la Idea</label>
 
@@ -129,7 +132,7 @@ $respuesta = $ideas->fetchAll(PDO::FETCH_ASSOC);
                 <?php if (!empty($_SESSION['mensaje'])): ?>
 
                     <div class="alert alert-<?= $_SESSION['mensaje']['tipo'] ?>" role="alert">
-                    <?= htmlspecialchars($_SESSION['mensaje']['texto'], ENT_QUOTES, 'UTF-8'); ?>
+                        <?= htmlspecialchars($_SESSION['mensaje']['texto'], ENT_QUOTES, 'UTF-8'); ?>
                     </div>
 
                     <?php unset($_SESSION['mensaje']); ?>
@@ -137,90 +140,74 @@ $respuesta = $ideas->fetchAll(PDO::FETCH_ASSOC);
                 <?php endif; ?>
 
                 <!-- Tabla de ideas -->
-                <?php if (!empty($respuesta)): ?>
+                <div class="table-responsive">
 
-                    <div class="table-responsive">
+                    <table id="tablaIdeas" class="table table-hover align-middle">
 
-                        <table class="table table-hover align-middle">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Texto</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
 
-                            <thead>
+                        <tbody id="cuerpoTabla">
+
+                            <?php foreach ($respuesta as $idea): ?>
+
                                 <tr>
-                                    <th>ID</th>
-                                    <th>Texto</th>
-                                    <th>Acciones</th>
+
+                                    <td>
+                                        <?= $idea['id'] ?>
+                                    </td>
+
+                                    <!-- Formulario para modificar -->
+                                    <td>
+                                        <form
+                                            action="modificar.php"
+                                            method="post"
+                                            class="d-flex align-items-center gap-2">
+
+                                            <input
+                                                class="form-control"
+                                                type="text"
+                                                name="texto"
+                                                value="<?= htmlspecialchars($idea['texto'], ENT_QUOTES, 'UTF-8') ?>"
+                                                required>
+
+                                            <input
+                                                type="hidden"
+                                                name="id"
+                                                value="<?= $idea['id'] ?>">
+
+                                            <button class="btn btn-secondary" type="submit">
+                                                Guardar
+                                            </button>
+
+                                        </form>
+                                    </td>
+
+                                    <!-- Formulario para eliminar -->
+                                    <td>
+                                        <form action="eliminar.php" method="post">
+
+                                            <input
+                                                type="hidden"
+                                                name="id"
+                                                value="<?= $idea['id'] ?>">
+
+                                            <button class="btn btn-danger" type="submit">
+                                                Eliminar
+                                            </button>
+
+                                        </form>
+                                    </td>
                                 </tr>
-                            </thead>
-
-                            <tbody>
-
-                                <?php foreach ($respuesta as $idea): ?>
-
-                                    <tr>
-
-                                        <td>
-                                            <?= $idea['id'] ?>
-                                        </td>
-
-                                        <!-- Formulario para modificar -->
-                                        <td>
-                                            <form
-                                                action="modificar.php"
-                                                method="post"
-                                                class="d-flex align-items-center gap-2">
-
-                                                <input
-                                                    class="form-control"
-                                                    type="text"
-                                                    name="texto"
-                                                    value="<?= htmlspecialchars($idea['texto'], ENT_QUOTES, 'UTF-8') ?>"
-                                                    required>
-
-                                                <input
-                                                    type="hidden"
-                                                    name="id"
-                                                    value="<?= $idea['id'] ?>">
-
-                                                <button class="btn btn-secondary" type="submit">
-                                                    Guardar
-                                                </button>
-
-                                            </form>
-                                        </td>
-
-                                        <!-- Formulario para eliminar -->
-                                        <td>
-                                            <form action="eliminar.php" method="post">
-
-                                                <input
-                                                    type="hidden"
-                                                    name="id"
-                                                    value="<?= $idea['id'] ?>">
-
-                                                <button class="btn btn-danger" type="submit">
-                                                    Eliminar
-                                                </button>
-
-                                            </form>
-                                        </td>
-
-                                    </tr>
-
-                                <?php endforeach; ?>
-
-                            </tbody>
-
-                        </table>
-
-                    </div>
-
-                <?php else: ?>
-
-                    <p class="text-muted text-center mb-0">
-                        Todavía no hay ideas registradas.
-                    </p>
-
-                <?php endif; ?>
-
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
 

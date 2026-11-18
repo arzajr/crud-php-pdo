@@ -1,5 +1,7 @@
 <?php
-session_start();
+//PENDIENTE: Comprobar que recibimos $_POST['texto'] y $_POST['id'] antes de utilizarlos
+
+header('Content-Type: application/json');
 require_once ('db.php');
 
 // Limpieza del texto recibido
@@ -8,10 +10,12 @@ $id = $_POST['id'];
 
 // Comprobamos que el texto no está vacío
 if ($texto === '') {
-    $_SESSION['mensaje'] = [
-        'tipo' => "danger",
-        'texto' => "ERROR. La idea no puede estar vacía"
-    ];
+    echo json_encode([
+        'success' => false,
+        'message' => 'ERROR. La idea no puede estar vacía!'
+    ]);
+
+    exit();
 }
 
 // Búsqueda de una idea con el mismo texto pero diferente ID
@@ -22,10 +26,12 @@ $idea = $query->fetch(PDO::FETCH_ASSOC);
 
 if ($idea !== false){
 
-$_SESSION['mensaje'] = [
-    'tipo' => "danger",
-    'texto' => "ERROR. La idea ya existe"
-];
+echo json_encode([
+        'success' => false,
+        'message' => 'ERROR. La idea ya existe!'
+    ]);
+
+    exit();
 
 } else {
 
@@ -34,19 +40,20 @@ $_SESSION['mensaje'] = [
         $stmt = $pdo->prepare("UPDATE ideas SET texto = :texto WHERE id=:id;");
         $stmt->execute(['id' => $id, 'texto' => $texto]);
 
-        $_SESSION['mensaje'] = [
-            'tipo' => "success",
-            'texto' => "Idea modificada correctamente!"
-        ];
+        echo json_encode([
+        'success' => true,
+        'message' => 'Idea modificada correctamente!'
+    ]);
+
+    exit();
 
     } catch (PDOException $e) {
         error_log($e->getMessage());
-            $_SESSION['mensaje'] = [
-                'tipo' => "danger",
-                'texto' => "ERROR: No ha sido posible modificar la idea"
-            ];
+            echo json_encode([
+        'success' => false,
+        'message' => 'ERROR. No se ha podido modificar la idea!'
+    ]);
+
+    exit();
     }    
 }
-
-header('Location: index.php');
-exit();

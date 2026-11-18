@@ -1,6 +1,7 @@
 <?php
-session_start();
 require_once('db.php');
+
+header('Content-Type:application/json');
 
 // Si la petición es POST y la variable texto contiene información
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['texto'])) {
@@ -16,17 +17,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['texto'])) {
 
     // Si el texto está vacío ERROR
     if ($texto === '') {
-        $_SESSION['mensaje'] = [
-            'tipo' => "danger",
-            'texto' => "ERROR: Idea vacía"
-        ];
-
+        echo json_encode([
+                'success' => false,
+                'message' => "Error. Idea vacía!"
+            ]);
     // Si la idea ya existe ERROR        
     } elseif ($idea !== false) {
-        $_SESSION['mensaje'] = [
-            'tipo' => "danger",
-            'texto' => "ERROR: Idea duplicada"
-        ];
+        echo json_encode([
+                'success' => false,
+                'message' => "Error. Idea duplicada!"
+            ]);
 
     // Sino, ejecutamos lógica INSERT
     } else {
@@ -39,20 +39,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['texto'])) {
             );
 
             $stmt->execute(['texto' => $texto]);
+            $id = $pdo->lastInsertId();
 
-            $_SESSION['mensaje'] = [
-                'tipo' => "success",
-                'texto' => "Idea guardada correctamente!"
-            ];
+            echo json_encode([
+                'success' => true,
+                'message' => "Idea guardada correctamente!",
+                'texto' => $texto,
+                'id' => $id
+            ]);
+            
         } catch (PDOException $e) {
             error_log($e->getMessage());
-            $_SESSION['mensaje'] = [
-                'tipo' => "danger",
-                'texto' => "ERROR: No ha sido posible guardar la idea"
-            ];
+            echo json_encode([
+                'success' => false,
+                'message' => "Error. No se ha podido guardar la idea!",
+                'texto' => $texto
+            ]);
         }
     }
 }
-// Redirección y terminación del script
-header('Location: index.php');
+// Respuesta JSON y terminación del script
 exit();
